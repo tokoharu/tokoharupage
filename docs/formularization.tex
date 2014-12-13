@@ -1,0 +1,272 @@
+\documentclass[13pt, a4paper, landscape]{jarticle}
+
+
+\title{定式化集}
+
+
+\date {\today}
+
+\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{ascmac}
+\usepackage{amsmath}
+\usepackage{courier}
+%\usepackage{eqnarray}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage{helvet}
+\usepackage{times}
+\setlength{\textwidth}{17cm}
+\setlength{\textheight}{23cm}
+\setlength{\oddsidemargin}{-0.5cm}
+\setlength{\evensidemargin}{-0.5cm}
+\setlength{\topmargin}{-1cm}
+%\usepackage{ascmac}
+%\usepackage{here}
+\usepackage{txfonts}
+\usepackage{listings}
+\usepackage{lscape}
+\usepackage{url}
+%\usepackage{hyperref}
+
+\renewcommand{\lstlistingname}{Liblary}
+
+\renewcommand{\proofname}{\bfseries proof}
+
+\newtheoremstyle{nonitalic}% name
+  {}%      Space above, empty = `usual value'
+  {}%      Space below
+  {\normalfont}% Body font
+  {}%         Indent amount (empty = no indent, \parindent = para indent)
+  {\bfseries}% Thm head font
+  {. \\ }%        Punctuation after thm head
+  { }%     Space after thm head: " " = normal interword space
+       	%         \newline = linebreak
+  {}% Thm head spec
+\theoremstyle{nonitalic} % from http://d.hatena.ne.jp/su48us/comment?date=20131206
+\newtheorem{Definition}{定義}[section]
+\newtheorem{Theorem}{定理}[section]
+\newtheorem{Problem}{問題}[section]
+%\theoremclass{Definition}
+%\theoremstyle{break}
+%\newframedtheorem{Def}[Definition]{定義}
+
+\begin{document}
+\maketitle
+
+\section{LPと主要問題}
+\subsection {LP, LPの双対問題}
+
+LP標準系
+\begin{align}
+ &&&&&\textrm{maximize}   && c^Tx \\
+ &&&&&\textrm{subject to} && Ax \leq b  &&&&&\\
+ &&&&&                    && x_i \geq 0 & i = 1,...,n &&&&&
+\end{align}
+
+双対LP標準系
+\begin{align}
+ &&&&&\textrm{minimize}   && b^Ty \\
+ &&&&&\textrm{subject to} && A^T y \geq c  &&&&&\\
+ &&&&&                    && y_j \geq 0 & j = 1,...,m &&&&&
+\end{align}
+
+ただし, 
+$A$ : $m*n$行列, 
+$x$ : $n$列ベクトル, 
+$y$ : $m$列ベクトル \\
+
+例 : 
+\begin{equation*}
+ A = 
+ \left[\begin{array}{cc}
+  1 & 1 \\
+  5 & 2 \\
+ \end{array}\right],
+ b = 
+ \left[\begin{array}{c}
+     1 \\
+     3 \\
+   \end{array}\right],
+ c = 
+ \left[\begin{array}{c}
+     1 \\
+     1 \\
+ \end{array}\right], 
+ 
+\end{equation*}
+のとき最適解 $x = (1/3, 2/3) , \gamma = 4/3  $, を得る。図を描けばわかりやすい.これの双対LP解は
+$y = (1/3, 1/3), \gamma = 4/3$である
+
+\subsubsection{不等式}
+\begin{array}{cc}
+  Minimization &  Maximization \\
+  変数 &  制約式 \\
+  $\leq$ & $\geq$ \\
+  自由 & $=$ \\
+  $\geq$ & $\leq$ \\
+
+  制約式 & 変数 \\
+  $\leq$ & $\leq$ \\
+  $$=$$ & 自由 \\
+  $\geq$ & $\geq$
+\end{array}
+
+
+\subsection{最短経路問題とLP}
+(やる気があれば : 脚注のようなgapが存在するような問題を調べる)
+
+概要 \\
+1. 自己ループ無し最短経路問題について \\
+2. LP形から最短経路問題への変換 \\
+3. INF辺を忘れないようにする \\
+\\
+
+線形計画問題として記述する \\
+$s-t$最短経路問題(自己ループが存在しないと仮定)とほぼ同値の問題を解説する。 \\
+しかし任意の$s-t$最短経路問題を下記の形で書くことで下記LPの解とは一致しないことに注意が必要。 LP から $s-t$最短経路問題の変形は可能。\footnotemark\\
+具体的には、$s$からすべての頂点に対して新しく コスト INF の辺を張らなければならない。 他は $i,j$間に有向グラフを張れば最短経路問題に変換可能。負閉路が検出されれば双対問題は解が存在せず、主問題では負へ発散となる。$x_t$がINFのままなら、双対問題では正へ発散、主問題では解なしとなる。\\
+前者の定式化はややわかりにくい形である。この形で出題はなかなかされない(最短経路問題をそのまま考えたほうがわかりやすいから) \\
+後者の定式化は比較的よく出る。''差分制約'' とおぼえておくのが良いだろう。 俗に牛ゲーと呼ばれる。 \\
+\footnotetext{ INFをつける理由が非自明である。簡潔に理由を述べるとINF辺をつけなければ閉路の存在判定が正しくできないのである。 \\
+双対バージョンの式をよく見ると負閉路がある場合に実行不能になることがわかる。一方、st最短経路問題を実装するときにはsから到達できる範囲に負閉路が存在しなければ負閉路の検出はできない。}
+
+
+LP標準系
+($|E|+1$変数, $|V|$制約)
+\begin{align}
+ &&&&&\textrm{minimize}   && \sum_{e=(i,j) \in E} c_e y_e \\
+ &&&&&\textrm{subject to} && \sum_{e=(j,v) \in E} y_e - \sum_{e=(v,j) \in E} y_e \geq 0 & v\neq s, v\neq t  &&&&&\\
+ &&&&&                    && \sum_{e=(j,v) \in E} y_e - \sum_{e=(v,j) \in E} y_e \geq 1 & v = t  &&&&&\\
+ &&&&&                    && \sum_{e=(j,v) \in E} y_e - \sum_{e=(v,j) \in E} y_e  + y_s \geq 0 & v=s &&&&&\\
+ &&&&&                    && y_s=0, y_e \geq 0 & e \in E&&&&&
+\end{align}
+
+双対LP標準系
+($|V|$変数, $|E|+1$制約)
+\begin{align}
+ &&&&&\textrm{maximize}   && x_t  \\
+ &&&&&\textrm{subject to} && x_j - x_i\leq c_e & e = (i,j) \in E  &&&&&\\
+ &&&&&                    && x_s = 0 &&&&&& \\
+ &&&&&                    && x_v \geq 0 & v \in V &&&&&
+\end{align}
+(3番目の式は本当は$x_s \leq 0$だが、わかりやすさのためにこのような記述しておいた。) \\
+
+
+\subsection{最大流問題とLP}
+最大流最小カット定理は有名な定理だが、ここではその定式化とその類型を見る。
+
+与えられる変数は$c_{ij}$である。これは各辺の最大流量を意味する
+
+LP主問題 \\
+$x_{ts}$を最大化する循環最大流問題を考える. \\
+したがって$x_{ts}$を辺集合$E$に付け加えて$E'$とする。\\
+この状況下で $|E|+1$変数 $|E|+|V|$制約となる。
+\begin{align}
+ &&&&&\textrm{maximize}   && x_{ts}  \\
+ &&&&&\textrm{subject to} && x_e\leq c_e & e = (i,j) \in E  &&&&&\\
+ &&&&&                    && \sum_{e = (j,v) \in E'} x_e - \sum_{e=(v,j) \in E'} \leq 0 & (v \in V) &&&&& \\
+ &&&&&                    && x_e \geq 0 & e \in E' &&&&&
+\end{align}
+$E, E'$がそれぞれ登場していることに注意
+
+
+LP双対問題 \\
+$v$の不等式に対応する変数が$p$であり、$e$の不等式に対応する変数がpであることに注意。\\
+$|E|+|V|$変数 $|E|+1$変数である
+\begin{align}
+ &&&&&\textrm{minimize}   && \sum_{e=(i,j)\in E} c_e y_e  \\
+ &&&&&\textrm{subject to} && y_e + p_j - p_i \geq 0 &  e = (i, j) \in E  &&&&&\\
+ &&&&&                    && p_s - p_t  \geq 1         &&&&& \\
+ &&&&&                    && p_v \geq 0,  y_e \geq 0 &  v \in V, e \in E &&&&&
+\end{align}
+
+まじめに考えると$p_s=1, p_t=0$であることがわかり頂点に対応する$p_i$のうちどれを1にしてどれを0にするかという問題になり $y_e$ はギリギリのところまで抑えるのがよいので結局最小カット問題であることがわかる
+
+
+\subsection{最小費用流とLP}
+
+最小費用流も有名である。 \\
+この問題では辺に対して２つの変数が与えられる。 \\
+$c_{ij}, u_{ij}$であり、それぞれ $ij$間に1流すコスト, $ij$間に流せる流量である。 \\
+さらに、$st$間に流せる量$F$も与えられる。
+
+\begin{align}
+ &&&&&\textrm{minimize}   && \sum_{e=(i,j)\in E} c_e x_e  \\
+ &&&&&\textrm{subject to} && x_{e} \leq u_e & e = (i,j) \in E \\
+ &&&&&                    && \sum_{e = (j,v) \in E} x_e - \sum_{e=(v,j) \in E} x_e= 0 & (v \in V, v\neq s) &&&&& \\
+ &&&&&                    && \sum_{e=(j,v) \in E} x_e - \sum_{e=(j,v)\in E} x_e = -F \\
+ &&&&&                    && x_e \geq 0 & e \in E &&&&&
+\end{align}
+
+
+
+
+\section{Problems}
+\subsection{AOJ2230, How to Create a Good Game}
+
+問題概要 \\
+DAGが与えられる。DAGの最大長を維持しながら辺に長さを足す。足せる長さの最大値を答えよ
+
+$|E|+|V|$変数, $E$ + 1　制約。
+\begin{align}
+ &&&&&\textrm{maximize}   && \sum_{e = (i,j)\in E} a_e \\
+ &&&&&\textrm{subject to} && a_e - x_j + x_i \leq - c_e & e = (i,j) \in E  &&&&&\\
+ &&&&&                    && x_t \leq  D &&&&&& \\
+ &&&&&                    && x_v \geq 0, a_e \geq 0 & v \in V, e \in E &&&&&
+\end{align}
+双対を取る。
+
+\begin{align}
+  &&&&& \textrm{minimize}   && Dp_t - \sum_{e = (i,j )\in E} c_e y_e \\
+  &&&&& \textrm{subject to} && -\sum_{e=(j,v) \in E} y_e + \sum_{e=(v,j) \in E} y_e \geq 0 & v \in V, v\neq t &&&&&\\
+  &&&&&                     && p_t - \sum_{e=(j,v) \in E} y_e \geq 0 & v=t \\
+  &&&&&                     && y_e \geq 1  & e \in E\\
+  &&&&&                     && y_e \geq 0, p_t \geq 0 & e\in E
+\end{align}
+
+
+これは最低流量1の最小費用流である。
+
+\subsection{ジョブ割当問題}
+$n$個のジョブと$m$人の作業員がいる。
+$S_i$はジョブ$i$を実行できる作業員の集合である。
+以下の様な定式化のもとで$x_{ij}$としてありうる最適解をひとつ求めよ。
+\begin{align}
+  &&&&& \textrm{minimize}   && \max_{j=1,...,m} \sum_{i:j \in S_i} x_{ij} \\
+  &&&&& \textrm{subject to} && \sum_{j \in S_i} x_{ij} = t_i  & i=1,...,n &&&&&\\
+\end{align}
+以下説明
+maxが出現した時の常套手段はそれに変数をつけてmaxの構成要素を制約式に持ってくることである
+\begin{align}
+  &&&&& \textrm{minimize}   && T \\
+  &&&&& \textrm{subject to} && \sum_{j \in S_i} x_{ij} = t_i  & i=1,...,n &&&&&\\
+  &&&&&                     &&  \sum_{i:j \in S_i} x_{ij} \leq T & j=1,...,m
+\end{align}
+
+この式は, 頂点$s$と頂点$i$の間に容量$t_i$の辺を張り, $j$と$t$の間に容量$T$の辺を張って$\sum_{i=1}^n t_i $ だけ最大流が流れるかどうかをチェックしつつTを二分探索すればよい
+
+
+
+\section{ネットワークフローの定式化}
+\subsection{maximum closure problem}
+$N$個の頂点がある。最初どの頂点も集合$B$に属しているが、これを集合$A$に移すことで利益を最大化したい。 \\
+$i$が$A$に属していた時には利得 $p_i$ を得る。 \\
+さらに、$x_j$が$A$に属し、かつ$y_j$が$B$に属していた時に$z_j$だけ損失をする。 \\
+最大スコアを求めよ \\
+
+
+この問題に対する解は
+\[ \sum_{v \in V } p_v - maxflow(s,t) \]
+ただし $maxflow(s,t) $とは\\
+$p_v>0$であれば$s$から$v$に容量$p_v$の辺を張り\\
+$p_v<0$であれば$v$から$t$に容量$-p_v$の辺を張り \\
+$x_j$から$y_j$に容量$z_j$の辺を張ったときの$st$間の最大流である  
+
+
+
+
+
+\end{document}
+
+
